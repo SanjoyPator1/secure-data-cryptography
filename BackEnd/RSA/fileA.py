@@ -61,3 +61,86 @@ def modular_inverse(a,b):
     # we use recursion so this is how we send the result to the previous stack frame
     return div, x, y
     
+
+def generate_large_prime(start=RANDOM_START, end=RANDOM_END):
+    # generate a random number [RANDOM_START, RANDOM_END]
+    num = random.randint(start,end)
+
+    # and check whether it is prime or not
+    while not is_prime(num):
+        num = random.randint(start,end)
+
+    # we know the number is prime
+    return num
+
+def generate_rsa_keys():
+
+    # generate the first huge random prime number
+    p = generate_large_prime()
+    # generate the second huge random prime number
+    q = generate_large_prime()
+
+    # this is the trapdoor function: multiplying is fast but getting p and q from n is an exponentially slow operation
+    n = p * q
+
+    # Euler's  phi function
+    phi = (p-1)*(q-1)
+
+    e = random.randrange(1,phi)
+
+    while gcd(e, phi) != 1 :
+        e = random.randrange(1, phi)
+
+    # d is the modular inverse of e
+    d = modular_inverse(e, phi)[1]
+
+    #private key and public key is
+    return (d,n), (e,n)
+
+
+# encrypt messages: we use public keys for encryption
+def encrypt(public_key, plain_text):
+    # e and n are needed for encryption (these are public)
+    e, n = public_key
+
+    # we use ASCII representations for the characters and the transformation of every character is stored in an array
+    cipher_text = []
+
+    # consider all the letters one by one and use modular exponentiation
+    for char in plain_text:
+        a = ord(char)
+        cipher_text.append(pow(a,e,n))
+
+    return cipher_text
+
+
+#decrypt messages: we use private keys for decryption
+def decrypt(private_key, cipher_text):
+    # d and n are needed for decryption (these are private)
+    d, n = private_key
+
+    plain_text = ''
+
+    for num in cipher_text:
+        a =  pow(num, d, n)
+        plain_text = plain_text + str(chr(a))
+
+    return plain_text
+
+
+if __name__ == '__main__':
+
+    private_key , public_key = generate_rsa_keys()
+
+    message = 'This is a dummy text that we will encrypt :)'
+    print("Original message: %s" % message)
+
+    cipher = encrypt(public_key, message)
+    print("Cipher text: %s" % cipher)
+
+    plain = decrypt(private_key, cipher)
+    print("Decrypted text: %s" % plain)
+
+
+
+
