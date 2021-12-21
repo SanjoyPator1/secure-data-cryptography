@@ -8,6 +8,9 @@ from math import sqrt
 RANDOM_START = 1e3
 RANDOM_END = 1e5
 
+
+
+
 def is_prime(num):
 
     # numbers smaller than 2 cannot be primes
@@ -128,18 +131,18 @@ def decrypt(private_key, cipher_text):
     return plain_text
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    private_key , public_key = generate_rsa_keys()
+#     private_key , public_key = generate_rsa_keys()
 
-    message = 'This is a dummy text that we will encrypt :)'
-    print("Original message: %s" % message)
+#     message = 'This is a dummy text that we will encrypt :)'
+#     print("Original message: %s" % message)
 
-    cipher = encrypt(public_key, message)
-    print("Cipher text: %s" % cipher)
+#     cipher = encrypt(public_key, message)
+#     print("Cipher text: %s" % cipher)
 
-    plain = decrypt(private_key, cipher)
-    print("Decrypted text: %s" % plain)
+#     plain = decrypt(private_key, cipher)
+#     print("Decrypted text: %s" % plain)
 
 
 
