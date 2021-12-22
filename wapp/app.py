@@ -37,14 +37,6 @@ def index():
 def about():
     return render_template('about.html')
 
-#all reports
-@app.route('/reports')
-def reports():
-    cur = mysql.connection.cursor();
-    #execute query
-    reportList = cur.execute("SELECT * FROM reports ")
-    reportsDetail = cur.fetchall()
-    return render_template('reports.html', reportsDetail = reportsDetail)
 
 #single article
 @app.route('/reports/<string:id>/')
@@ -113,17 +105,19 @@ def login():
 
         #Get user by username
         result = cur.execute("SELECT * FROM users WHERE  username = %s", [username])
-
+     
         if result > 0:
             #Get stored hash
             data = cur.fetchone()
             password = data['password']
+            id= int(data['id'])
 
             #Compare Passwords
             if sha256_crypt.verify(password_candidate, password):
-                #passed
+                #passed                
                 session['logged_in'] = True
                 session['username'] = username
+                session['id'] = id
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
@@ -162,6 +156,20 @@ def layout():
 def dashboard():
     return render_template('dashboard.html')
 
+# display shared reports
+@app.route('/reports')
+@is_logged_in
+def reports():
+    id = session['id']
+    cur = mysql.connection.cursor();
+    #execute query
+    reportList = cur.execute("SELECT * FROM reports where sharedToUser = "+str(id)+"")
+    reportsDetail = cur.fetchall()
+    return render_template('reports.html', reportsDetail = reportsDetail)
+
+
+
+
 
 # Image upload
 
@@ -179,6 +187,9 @@ def save_images(photo):
 def shareReport(id, name):
     if request.method == "POST":
         sharedBy = session["username"]
+        sharedTo = name
+        sharedToUser = id
+
         description = request.form['description']
         report = save_images(request.files['reports'])
         key_to_encrypt_file = "jsdbfjdbnjf"
@@ -195,7 +206,7 @@ def shareReport(id, name):
         encrypted_key = str(encrypted_key)
 
         
-        cur.execute("INSERT INTO reports(sharedBy, description, report, encrypted_key)" "VALUES(%s, %s, %s, %s)", (sharedBy, description, report, encrypted_key))
+        cur.execute("INSERT INTO reports(sharedBy, description, report, encrypted_key, sharedToUser, sharedTo)" "VALUES(%s, %s, %s, %s, %s, %s)", (sharedBy, description, report, encrypted_key, int(sharedToUser), sharedTo))
         mysql.connection.commit()
         cur.close()
 
@@ -208,6 +219,29 @@ def shareReport(id, name):
         flash('Report uploaded successfully', 'success')
         return redirect('/')
     return render_template('shareReport.html', name = name, id = id)
+
+
+# decryption of reports
+@app.route('/<string:id>/download', methods = ['POST','GET'])
+@is_logged_in
+def decryptAndDownload(id):
+    #decrypt key_to_encrypt_file using RSA
+
+
+    # decrypt report using AES
+
+    #decrypt(filename, key)
+
+
+
+    flash('Report uploaded successfully', 'success')
+    return redirect('/')
+    return render_template('shareReport.html', name = name, id = id)
+
+
+
+
+
 
 #all registered patients
 @app.route('/usersList', methods = ['POST','GET'] )
