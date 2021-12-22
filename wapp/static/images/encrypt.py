@@ -2,7 +2,9 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from base64 import b64encode
 
-
+key  ='zertundf'
+key  = key.encode('UTF-8')
+key = pad(key, AES.block_size)
 
 def encrypt(file_name, key ) :
 	with open(file_name, 'rb') as entry:
@@ -17,5 +19,5 @@ def encrypt(file_name, key ) :
 		data.write(to_write)
 	data.close()
 	
-
+encrypt('1pyeTS9mRjrG_g.png', key)
 		

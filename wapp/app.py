@@ -10,6 +10,12 @@ from functools import wraps
 import os
 import secrets
 
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+from base64 import b64encode
+import encrypt as encryptAES
+import rsa as rsa
+
 app  = Flask(__name__)
 
 #config MySQL
@@ -62,6 +68,15 @@ class RegisterForm(Form):
 def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
+
+        #generate private and public key
+        private_key, public_key = rsa.generate_rsa_keys()
+        e,n = public_key
+        d, n = private_key
+        e = str(e)
+        n = str(n)
+        d = str(d)
+        
         name = form.name.data
         email = form.email.data
         username = form.username.data
@@ -71,7 +86,7 @@ def register():
         cur = mysql.connection.cursor();
 
         #execute query
-        cur.execute("INSERT INTO users(name, email, username, password, profession ) VALUES(%s, %s, %s, %s, %s)", (name, email, username, password, profession) )
+        cur.execute("INSERT INTO users(name, email, username, password, profession, e, n, d ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)", (name, email, username, password, profession, e, n, d) )
         
         #Commit to DB
         mysql.connection.commit()
@@ -166,10 +181,30 @@ def shareReport(id, name):
         sharedBy = session["username"]
         description = request.form['description']
         report = save_images(request.files['reports'])
+        key_to_encrypt_file = "jsdbfjdbnjf"
+        encrypted_key = key_to_encrypt_file
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO reports(sharedBy, description, report)" "VALUES(%s, %s, %s)", (sharedBy, description, report))
+        #fetch public_key 
+        public_key_data = cur.execute("SELECT * from users where id ="+id+'')
+        valid = cur.fetchone()
+
+        e = int(valid["e"])
+        n = int(valid["n"])
+        public_key = e , n 
+        encrypted_key =  rsa.encrypt(public_key, encrypted_key)
+        encrypted_key = str(encrypted_key)
+
+        
+        cur.execute("INSERT INTO reports(sharedBy, description, report, encrypted_key)" "VALUES(%s, %s, %s, %s)", (sharedBy, description, report, encrypted_key))
         mysql.connection.commit()
         cur.close()
+
+        
+        key_to_encrypt_file  = key_to_encrypt_file.encode('UTF-8')
+        key_to_encrypt_file = pad(key_to_encrypt_file, AES.block_size)
+        encryptAES.encrypt('static/images/'+report +'', key_to_encrypt_file)
+
+
         flash('Report uploaded successfully', 'success')
         return redirect('/')
     return render_template('shareReport.html', name = name, id = id)
