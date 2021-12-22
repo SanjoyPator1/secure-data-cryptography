@@ -1,0 +1,82 @@
+{% extends 'layouts.html' %}
+
+{% block body %}
+<div class="jumbotron text-center">
+    <ul class="nav nav-pills">
+        <li class="active"><a data-toggle="pill" href="#patientList">Patients</a></li>
+        <li><a data-toggle="pill" href="#DoctorsList">Doctors</a></li>
+        <li><a data-toggle="pill" href="#StaffList">Staff</a></li>
+    </ul>
+    <br>
+    <div class="tab-content ">
+        <div id="patientList" class="tab-pane fade in active ">
+            <div class="row">
+                {% for Patient in Patients%} 
+              
+                    <div class="col-sm-6 col-md-4">
+                      <div class="thumbnail">
+                        <img src="/static/users/avatar.png" height="200" width="200"  alt="...">
+                        <div class="caption">
+                        <h3>{{Patient.name}}</h3>
+                          <h5>{{Patient.email}}</h5>
+                          <p><a href="/users/{{Patient.id}}/{{Patient.username}}" class="btn btn-primary" role="button">View</a> 
+                            <a href="/{{Patient.id}}/{{Patient.name}}/report/share" class="btn btn-default" role="button">Share</a></p>
+                        </div>
+                      </div>
+                    </div>
+    
+                {% endfor%}
+            </div>
+        </div>
+        <div id="DoctorsList" class="tab-pane fade">
+            <div id="DoctorsList" class="tab-pane fade in active">
+                <div class="row">
+                    {% for Doctor in Doctors%} 
+                  
+                        <div class="col-sm-6 col-md-4">
+                          <div class="thumbnail">
+                            <img src="/static/users/avatar.png" height="200" width="200"  alt="...">
+                            <div class="caption">
+                            <h3>{{Doctor.name}}</h3>
+                              <h5>{{Doctor.email}}</h5>
+                              <p><a href="/users/{{Doctor.id}}/{{Doctor.username}}" class="btn btn-primary" role="button">View</a> 
+                                <a href="#" class="btn btn-default" role="button">Share</a></p>
+                            </div>
+                          </div>
+                        </div>
+        
+                    {% endfor%}
+                </div>
+            </div>
+        </div>
+        <div id="StaffList" class="tab-pane fade">
+            <div id="StaffList" class="tab-pane fade in active">
+                <div class="row">
+                    {% for Staff in Staffs%} 
+                  
+                        <div class="col-sm-6 col-md-4">
+                          <div class="thumbnail">
+                            <img src="/static/users/avatar.png" height="200" width="200"  alt="...">
+                            <div class="caption">
+                            <h3>{{Staff.name}}</h3>
+                              <h5>{{Staff.email}}</h5>
+                              <p><a href="/users/{{Staff.id}}/{{Staff.username}}" class="btn btn-primary" role="button">View</a> 
+                                <a href="#" class="btn btn-default" role="button">Share</a></p>
+                            </div>
+                          </div>
+                        </div>
+        
+                    {% endfor%}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
+
+<div>
+
+    
+
+{% endblock %}

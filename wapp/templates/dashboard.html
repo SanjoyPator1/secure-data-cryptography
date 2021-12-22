@@ -1,0 +1,28 @@
+{% extends 'layouts.html' %}
+
+{% block body %}
+<div class="jumbotron">
+    <h3>Dashboard <br><small>Hi {{session.username}}</small></h3>
+    <div class="row">
+        <div class="col-xs-6 col-md-3">
+        <div style="height: 200px; 
+                    width: 200px;
+                    background-color: lightgreen;">
+            <h3 style="color: white;
+            align-items: center;
+            padding: 40%;">6+</h3>
+                
+        </div>
+        </div>
+        <div class="col-xs-6 col-md-3">
+            <div style="height: 200px; 
+                    width: 200px;
+                    background-color: lightgreen;">
+                <h3 style="color: white;
+                align-items: center;
+                padding: 40%;">10</h3>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
