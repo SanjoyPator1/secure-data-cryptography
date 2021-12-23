@@ -250,14 +250,15 @@ def usersList():
     #Create cursor
     cur = mysql.connection.cursor();
     name = session["username"]
+    current_user = session['id']
     #execute query
-    UserListPatient = cur.execute("SELECT * FROM users WHERE profession='Patient'")
+    UserListPatient = cur.execute("SELECT * FROM users WHERE profession='Patient' and id != "+str(current_user)+"")
     Patients = cur.fetchall()
 
-    UserListDoctor = cur.execute("SELECT * FROM users WHERE profession='Doctor'")
+    UserListDoctor = cur.execute("SELECT * FROM users WHERE profession='Doctor'and id != "+str(current_user)+"")
     Doctors = cur.fetchall()
 
-    UserListStaff = cur.execute("SELECT * FROM users WHERE profession='Staff'")
+    UserListStaff = cur.execute("SELECT * FROM users WHERE profession='Staff'and id != "+str(current_user)+"")
     Staffs = cur.fetchall()
 
     if UserListPatient > 0 or UserListDoctor > 0 or UserListStaff > 0:
