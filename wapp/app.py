@@ -14,7 +14,9 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from base64 import b64encode
 import encrypt as encryptAES
+import decrypt as decryptAES
 import rsa as rsa
+
 
 app  = Flask(__name__)
 
@@ -181,7 +183,7 @@ def save_images(photo):
     photo.save(file_path)
     return photo_name
 
-
+# share report
 @app.route('/<string:id>/<string:name>/report/share', methods = ['POST','GET'])
 @is_logged_in
 def shareReport(id, name):
@@ -203,7 +205,8 @@ def shareReport(id, name):
         n = int(valid["n"])
         public_key = e , n 
         encrypted_key =  rsa.encrypt(public_key, encrypted_key)
-        encrypted_key = str(encrypted_key)
+
+        encrypted_key = ' '.join(map(str,encrypted_key))
 
         
         cur.execute("INSERT INTO reports(sharedBy, description, report, encrypted_key, sharedToUser, sharedTo)" "VALUES(%s, %s, %s, %s, %s, %s)", (sharedBy, description, report, encrypted_key, int(sharedToUser), sharedTo))
@@ -225,18 +228,52 @@ def shareReport(id, name):
 @app.route('/<string:id>/download', methods = ['POST','GET'])
 @is_logged_in
 def decryptAndDownload(id):
+
+    key_to_encrypt_file = "jsdbfjdbnjf"
+
+    
+    
     #decrypt key_to_encrypt_file using RSA
+    cur = mysql.connection.cursor()
 
+    #fetch encrypted_key 
+    public_report_data = cur.execute("SELECT * from reports where id ="+id+'')
+    valid = cur.fetchone()
+    report = valid['report']
 
+    encrypted_key = valid['encrypted_key']
+    arr = encrypted_key.split(' ')
+    final_encryptedArr = [int(i) for i in arr]
+
+    #get p
+    loggedInUser = str(session['id'])
+    
+    private_key_data = cur.execute("SELECT * from users where id ="+loggedInUser+'')
+    valid = cur.fetchone()
+
+    d = int(valid["d"])
+    n = int(valid["n"])
+    private_key = d , n 
+
+    decryptedKey =  rsa.decrypt(private_key, final_encryptedArr)
+
+    
     # decrypt report using AES
+    decryptedKey = decryptedKey.encode('UTF-8')
+    decryptedKey = pad(decryptedKey, AES.block_size)
 
     #decrypt(filename, key)
+    decryptAES.decrypt('static/images/'+report +'', decryptedKey)
 
+    #download 
+
+
+    #ReEncrypt
+    # encryptAES.encrypt('static/images/'+report +'', decryptedKey)
 
 
     flash('Report uploaded successfully', 'success')
     return redirect('/')
-    return render_template('shareReport.html', name = name, id = id)
 
 
 
