@@ -13,6 +13,7 @@ import secrets
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from base64 import b64encode
+from download import download_file
 import encrypt as encryptAES
 import decrypt as decryptAES
 import rsa as rsa
@@ -229,10 +230,6 @@ def shareReport(id, name):
 @is_logged_in
 def decryptAndDownload(id):
 
-    key_to_encrypt_file = "jsdbfjdbnjf"
-
-    
-    
     #decrypt key_to_encrypt_file using RSA
     cur = mysql.connection.cursor()
 
@@ -267,18 +264,47 @@ def decryptAndDownload(id):
 
     #download 
 
+    
 
     #ReEncrypt
     # encryptAES.encrypt('static/images/'+report +'', decryptedKey)
+    return download_file('static/images/'+report +'', report)
 
+@app.route('/<string:id>/encrypt', methods = ['POST','GET'])
+@is_logged_in
+def encryptOnce(id):
 
-    flash('Report uploaded successfully', 'success')
-    return redirect('/')
+    #decrypt key_to_encrypt_file using RSA
+    cur = mysql.connection.cursor()
 
+    #fetch encrypted_key 
+    public_report_data = cur.execute("SELECT * from reports where id ="+id+'')
+    valid = cur.fetchone()
+    report = valid['report']
 
+    encrypted_key = valid['encrypted_key']
+    arr = encrypted_key.split(' ')
+    final_encryptedArr = [int(i) for i in arr]
 
+    #get p
+    loggedInUser = str(session['id'])
+    
+    private_key_data = cur.execute("SELECT * from users where id ="+loggedInUser+'')
+    valid = cur.fetchone()
 
+    d = int(valid["d"])
+    n = int(valid["n"])
+    private_key = d , n 
 
+    decryptedKey =  rsa.decrypt(private_key, final_encryptedArr)
+
+    
+    # decrypt report using AES
+    decryptedKey = decryptedKey.encode('UTF-8')
+    decryptedKey = pad(decryptedKey, AES.block_size)
+
+    encryptAES.encrypt('static/images/'+report +'', decryptedKey)
+    return redirect("/reports")
 
 #all registered patients
 @app.route('/usersList', methods = ['POST','GET'] )

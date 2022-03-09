@@ -16,5 +16,6 @@ def encrypt(file_name, key ) :
 	with open(file_name, 'w') as data:
 		data.write(to_write)
 	data.close()
+	return "true"
 	
 

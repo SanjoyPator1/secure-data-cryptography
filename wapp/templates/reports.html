@@ -7,10 +7,20 @@
     
           <div class="col-sm-6 col-md-4">
             <div class="thumbnail">
+              <h4><b>{{report.sharedBy}}</b></h4>
+              <p> 
+                <i class="badge badge-primary">{{report.create_date.strftime('%d-%m-%Y')}}</i>
+              </p>
+              <p style="background-color: rgba(238, 238, 238, 0.884);
+                        padding: 5%;
+                        ">
+                {{report.description}}
+              </p>
               <img src="/static/reports/file.png" height="200" width="200"  alt="...">
               <div class="caption">
-              <h3>Shared By <b>{{report.sharedBy}}</b></h3>
-              <a href="/{{report.id}}/download" class="btn btn-primary" role="button">Decrypt and Download</a></p>
+              
+              <a href="/{{report.id}}/download" class="btn btn-primary" role="button" download>Decrypt and Download</a></p>
+              <a href="/{{report.id}}/encrypt" class="btn btn-warning" role="button">Encrypt</a></p>
 
               </div>
             </div>
