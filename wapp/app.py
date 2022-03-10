@@ -17,7 +17,8 @@ from download import download_file
 import encrypt as encryptAES
 import decrypt as decryptAES
 import rsa as rsa
-
+import random
+import string
 
 app  = Flask(__name__)
 
@@ -113,6 +114,7 @@ def login():
             #Get stored hash
             data = cur.fetchone()
             password = data['password']
+            name = data['name']
             id= int(data['id'])
 
             #Compare Passwords
@@ -120,6 +122,7 @@ def login():
                 #passed                
                 session['logged_in'] = True
                 session['username'] = username
+                session['name'] = name
                 session['id'] = id
 
                 flash('You are now logged in', 'success')
@@ -157,7 +160,15 @@ def layout():
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
-    return render_template('dashboard.html')
+    id = session['id']
+    cur = mysql.connection.cursor();
+    #execute query
+    reportList = cur.execute("SELECT count(*) FROM reports where sharedToUser = "+str(id)+"")
+    received =  [v for v in cur.fetchone().values()][0]
+
+    reportList2 = cur.execute("SELECT count(*) FROM reports where sharedByUser = "+ str(id) +"")
+    shared =  [v for v in cur.fetchone().values()][0]
+    return render_template('dashboard.html', received=received, shared = shared)
 
 # display shared reports
 @app.route('/reports')
@@ -189,13 +200,15 @@ def save_images(photo):
 @is_logged_in
 def shareReport(id, name):
     if request.method == "POST":
+        sharedByUser = session['id']
         sharedBy = session["username"]
         sharedTo = name
         sharedToUser = id
 
         description = request.form['description']
         report = save_images(request.files['reports'])
-        key_to_encrypt_file = "jsdbfjdbnjf"
+        key_to_encrypt_file = ''.join(random.choices(string.ascii_uppercase +
+                             string.digits, k = 16))
         encrypted_key = key_to_encrypt_file
         cur = mysql.connection.cursor()
         #fetch public_key 
@@ -210,7 +223,7 @@ def shareReport(id, name):
         encrypted_key = ' '.join(map(str,encrypted_key))
 
         
-        cur.execute("INSERT INTO reports(sharedBy, description, report, encrypted_key, sharedToUser, sharedTo)" "VALUES(%s, %s, %s, %s, %s, %s)", (sharedBy, description, report, encrypted_key, int(sharedToUser), sharedTo))
+        cur.execute("INSERT INTO reports(sharedBy, description, report, encrypted_key, sharedToUser, sharedTo, sharedByUser)" "VALUES(%s, %s, %s, %s, %s, %s, %s)", (sharedBy, description, report, encrypted_key, int(sharedToUser), sharedTo, sharedByUser))
         mysql.connection.commit()
         cur.close()
 

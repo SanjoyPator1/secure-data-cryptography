@@ -5,22 +5,25 @@
     <h3>Dashboard <br><small>Hi {{session.username}}</small></h3>
     <div class="row">
         <div class="col-xs-6 col-md-3">
+          <p>Reports Received </p>  
         <div style="height: 200px; 
                     width: 200px;
                     background-color: lightgreen;">
             <h3 style="color: white;
             align-items: center;
-            padding: 40%;">6+</h3>
+            padding: 40%;">{{received}}</h3>
                 
         </div>
         </div>
         <div class="col-xs-6 col-md-3">
+          <p>Reports shared </p>  
+
             <div style="height: 200px; 
                     width: 200px;
                     background-color: lightgreen;">
                 <h3 style="color: white;
                 align-items: center;
-                padding: 40%;">10</h3>
+                padding: 40%;">{{shared}}</h3>
             </div>
         </div>
     </div>
